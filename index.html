@@ -7,465 +7,553 @@
 <title>FASTBARTYPE - Typing Test</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-
-:root{
-  --bg:#080b12;
-  --box:#111827;
-  --text:#fff;
-  --muted:#9ca3af;
-  --green:#00ffab;
-  --border:#263044;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-body.light{
-  --bg:#f3f5f9;
-  --box:#fff;
-  --text:#111827;
-  --muted:#64748b;
-  --border:#dce2ec;
+:root {
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --text: #172033;
+    --muted: #667085;
+    --primary: #2563eb;
+    --border: #dfe4ee;
 }
 
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,sans-serif;
+body.dark {
+    --bg: #10131b;
+    --card: #1b202b;
+    --text: #f5f7fb;
+    --muted: #aab3c5;
+    --primary: #60a5fa;
+    --border: #343b4a;
 }
 
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:20px 6%;
-  border-bottom:1px solid var(--border);
+body {
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+    transition: 0.2s;
 }
 
-.logo{
-  font-size:25px;
-  font-weight:bold;
-  color:var(--green);
+.container {
+    max-width: 850px;
+    margin: auto;
 }
 
-.logo span{color:var(--text)}
-
-button,select{
-  cursor:pointer;
-  border:0;
-  border-radius:10px;
-  padding:13px;
-  font-weight:bold;
+header {
+    text-align: center;
+    margin: 20px 0 30px;
 }
 
-#theme{
-  background:var(--box);
-  color:var(--text);
-  border:1px solid var(--border);
+.logo {
+    font-size: 34px;
+    font-weight: 900;
+    color: var(--primary);
+    letter-spacing: 1px;
 }
 
-main{
-  max-width:850px;
-  margin:35px auto;
-  padding:15px;
+header p {
+    color: var(--muted);
+    margin-top: 8px;
 }
 
-.hero{
-  text-align:center;
-  margin-bottom:30px;
+.top-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
 }
 
-.hero h1{font-size:34px}
-.hero h1 span{color:var(--green)}
-.hero p{color:var(--muted);margin-top:12px}
-
-.box{
-  background:var(--box);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:22px;
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.04);
 }
 
-.settings{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-bottom:22px;
+.settings {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-label{
-  color:var(--muted);
-  font-size:13px;
+.setting {
+    flex: 1;
+    min-width: 130px;
 }
 
-select{
-  width:100%;
-  margin-top:8px;
-  background:var(--bg);
-  color:var(--text);
-  border:1px solid var(--border);
+label {
+    display: block;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 8px;
 }
 
-.stats{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-  margin-bottom:22px;
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
 }
 
-.stat{
-  background:var(--bg);
-  padding:15px 5px;
-  text-align:center;
-  border-radius:12px;
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    text-align: center;
 }
 
-.stat h2{
-  color:var(--green);
-  font-size:25px;
+.stat {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 16px 8px;
 }
 
-.stat p{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:6px;
+.stat h2 {
+    font-size: 28px;
+    color: var(--primary);
+    margin-bottom: 5px;
 }
 
-#passage{
-  font-size:20px;
-  line-height:2;
-  color:var(--muted);
-  margin-bottom:20px;
-  overflow-wrap:anywhere;
+.stat p {
+    color: var(--muted);
+    font-size: 13px;
 }
 
-.correct{color:var(--green)}
-.wrong{color:#ff5268;background:#51202b}
-.active{border-bottom:2px solid var(--green)}
-
-textarea{
-  width:100%;
-  height:120px;
-  resize:vertical;
-  background:var(--bg);
-  color:var(--text);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:15px;
-  font-size:18px;
-  line-height:1.6;
-  outline:none;
+.text-box {
+    font-size: 20px;
+    line-height: 1.9;
+    min-height: 150px;
+    overflow-wrap: anywhere;
+    user-select: none;
 }
 
-textarea:focus{border-color:var(--green)}
-
-.buttons{
-  display:flex;
-  gap:10px;
-  margin-top:15px;
+.text-box span.correct {
+    color: #16a34a;
 }
 
-#start{
-  background:var(--green);
-  color:#07120b;
-  flex:1;
+.text-box span.wrong {
+    color: #ef4444;
+    background: rgba(239,68,68,0.12);
+    border-radius: 3px;
 }
 
-#reset{
-  background:var(--border);
-  color:var(--text);
+.text-box span.current {
+    border-left: 2px solid var(--primary);
 }
 
-#result{
-  text-align:center;
-  color:var(--green);
-  margin-top:20px;
-  font-size:18px;
-  line-height:1.6;
+textarea {
+    width: 100%;
+    min-height: 130px;
+    resize: vertical;
+    padding: 15px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1.6;
+    outline: none;
+    margin-top: 15px;
 }
 
-footer{
-  text-align:center;
-  color:var(--muted);
-  padding:25px;
+textarea:focus {
+    border-color: var(--primary);
 }
 
-@media(max-width:600px){
-  main{margin:20px auto}
-  .hero h1{font-size:28px}
-  .box{padding:15px}
-  #passage{font-size:18px}
-  .stats{grid-template-columns:repeat(2,1fr)}
+textarea:disabled {
+    opacity: 0.7;
+}
+
+.buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 13px 18px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    background: var(--primary);
+    color: white;
+}
+
+button.secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+button:hover {
+    opacity: 0.88;
+}
+
+.message {
+    color: var(--muted);
+    margin-top: 12px;
+    font-size: 14px;
+    text-align: center;
+}
+
+footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 20px 0;
+}
+
+@media (max-width: 500px) {
+    body {
+        padding: 12px;
+    }
+
+    .card {
+        padding: 16px;
+    }
+
+    .logo {
+        font-size: 27px;
+    }
+
+    .text-box {
+        font-size: 18px;
+    }
+
+    .stat h2 {
+        font-size: 23px;
+    }
 }
 </style>
 </head>
 
 <body>
+<div class="container">
 
 <header>
-  <div class="logo">FAST<span>BARTYPE</span></div>
-  <button id="theme">☀️ Light</button>
+    <div class="logo">FASTBARTYPE</div>
+    <p>Improve your typing speed and accuracy</p>
 </header>
 
-<main>
-
-<section class="hero">
-  <h1>Typing <span>Speed Test</span></h1>
-  <p>Practice every day. Improve your speed.</p>
-</section>
-
-<section class="box">
-
-<div class="settings">
-  <label>
-    Language
-    <select id="language">
-      <option value="en">English Typing</option>
-      <option value="hi">Hindi Typing</option>
-    </select>
-  </label>
-
-  <label>
-    Test Time
-    <select id="duration">
-      <option value="30">30 Seconds</option>
-      <option value="60" selected>1 Minute</option>
-      <option value="120">2 Minutes</option>
-    </select>
-  </label>
+<div class="top-buttons">
+    <button class="secondary" id="themeButton">🌙 Dark Mode</button>
 </div>
 
-<div class="stats">
-  <div class="stat">
-    <h2 id="timer">60</h2>
-    <p>SECONDS</p>
-  </div>
+<div class="card">
+    <div class="settings">
+        <div class="setting">
+            <label for="language">Language</label>
+            <select id="language">
+                <option value="english">English</option>
+                <option value="hindi">Hindi</option>
+            </select>
+        </div>
 
-  <div class="stat">
-    <h2 id="wpm">0</h2>
-    <p>WPM</p>
-  </div>
-
-  <div class="stat">
-    <h2 id="accuracy">100%</h2>
-    <p>ACCURACY</p>
-  </div>
-
-  <div class="stat">
-    <h2 id="best">0</h2>
-    <p>BEST WPM</p>
-  </div>
+        <div class="setting">
+            <label for="duration">Time</label>
+            <select id="duration">
+                <option value="30">30 Seconds</option>
+                <option value="60" selected>1 Minute</option>
+                <option value="120">2 Minutes</option>
+            </select>
+        </div>
+    </div>
 </div>
 
-<div id="passage"></div>
+<div class="card">
+    <div class="stats">
+        <div class="stat">
+            <h2 id="timer">60</h2>
+            <p>Time Left</p>
+        </div>
 
-<textarea id="typing" disabled
-placeholder="Start test and type here..."></textarea>
+        <div class="stat">
+            <h2 id="wpm">0</h2>
+            <p>WPM</p>
+        </div>
 
-<div class="buttons">
-  <button id="start">START TEST</button>
-  <button id="reset">RESET</button>
+        <div class="stat">
+            <h2 id="accuracy">100%</h2>
+            <p>Accuracy</p>
+        </div>
+    </div>
 </div>
 
-<div id="result"></div>
+<div class="card">
+    <label>Type the text below</label>
+    <div class="text-box" id="textDisplay"></div>
 
-</section>
-</main>
+    <textarea
+        id="typingInput"
+        placeholder="Yahan typing shuru karo..."
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+    ></textarea>
 
-<footer>© 2026 FASTBARTYPE</footer>
+    <div class="buttons">
+        <button id="resetButton">🔄 Restart</button>
+        <button id="shareResult">📤 Share Result</button>
+    </div>
+
+    <p class="message" id="message">
+        Typing shuru karte hi timer start ho jayega.
+    </p>
+</div>
+
+<div class="card">
+    <div class="stats">
+        <div class="stat">
+            <h2 id="bestWpm">0</h2>
+            <p>Best WPM</p>
+        </div>
+        <div class="stat">
+            <h2 id="totalTests">0</h2>
+            <p>Tests Completed</p>
+        </div>
+        <div class="stat">
+            <h2>⌨️</h2>
+            <p>Keep Practicing</p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    FASTBARTYPE © 2026 | Practice. Improve. Repeat.
+</footer>
+
+</div>
 
 <script>
 const englishText =
-"Practice every day to improve your typing speed and accuracy. Keep your fingers relaxed and focus on typing each word correctly. Learning a new skill takes time. Stay consistent and keep improving with FASTBARTYPE.";
+"The best way to improve your typing is to practice every day. " +
+"Stay focused, keep your hands relaxed, and try to type accurately. " +
+"Speed will improve with regular practice. " +
+"Never give up and keep learning something new.";
 
 const hindiText =
-"नियमित अभ्यास से आपकी टाइपिंग की गति और सटीकता बेहतर होती है। धीरे धीरे अभ्यास करें और हर शब्द को सही लिखने की कोशिश करें। मेहनत और निरंतर अभ्यास से आप एक अच्छे टाइपिस्ट बन सकते हैं।";
+"अच्छी टाइपिंग सीखने के लिए रोज अभ्यास करना जरूरी है। " +
+"ध्यान से टाइप करें और सही शब्द लिखने की कोशिश करें। " +
+"नियमित अभ्यास से आपकी गति और सटीकता बेहतर होगी। " +
+"हर दिन कुछ नया सीखें और मेहनत करते रहें।";
 
-const passage = document.getElementById("passage");
-const typing = document.getElementById("typing");
-const timer = document.getElementById("timer");
-const wpm = document.getElementById("wpm");
-const accuracy = document.getElementById("accuracy");
-const best = document.getElementById("best");
-const start = document.getElementById("start");
-const reset = document.getElementById("reset");
 const language = document.getElementById("language");
 const duration = document.getElementById("duration");
-const theme = document.getElementById("theme");
-const result = document.getElementById("result");
+const textDisplay = document.getElementById("textDisplay");
+const typingInput = document.getElementById("typingInput");
+const timerDisplay = document.getElementById("timer");
+const wpmDisplay = document.getElementById("wpm");
+const accuracyDisplay = document.getElementById("accuracy");
+const bestWpmDisplay = document.getElementById("bestWpm");
+const totalTestsDisplay = document.getElementById("totalTests");
+const message = document.getElementById("message");
+const themeButton = document.getElementById("themeButton");
 
-let text = englishText;
+let targetText = "";
 let timeLeft = 60;
-let running = false;
-let interval = null;
-let startTime = null;
+let timerInterval = null;
+let started = false;
+let finished = false;
+let bestWpm = Number(localStorage.getItem("fastbar_best") || 0);
+let totalTests = Number(localStorage.getItem("fastbar_tests") || 0);
 
-function getBest(){
-  try{
-    return Number(localStorage.getItem("fastbartype-best") || 0);
-  }catch{
-    return 0;
-  }
+bestWpmDisplay.textContent = bestWpm;
+totalTestsDisplay.textContent = totalTests;
+
+function getText() {
+    return language.value === "hindi" ? hindiText : englishText;
 }
 
-function saveBest(score){
-  try{
-    localStorage.setItem("fastbartype-best",score);
-  }catch{}
+function renderText() {
+    targetText = getText();
+    textDisplay.innerHTML = "";
+
+    [...targetText].forEach((character, index) => {
+        const span = document.createElement("span");
+        span.textContent = character;
+
+        if (index === 0) {
+            span.classList.add("current");
+        }
+
+        textDisplay.appendChild(span);
+    });
 }
 
-best.textContent = getBest();
+function resetTest() {
+    clearInterval(timerInterval);
 
-function renderText(){
-  passage.innerHTML = "";
+    started = false;
+    finished = false;
+    timeLeft = Number(duration.value);
 
-  text.split("").forEach((char,index)=>{
-    const span = document.createElement("span");
-    span.textContent = char;
+    timerDisplay.textContent = timeLeft;
+    wpmDisplay.textContent = "0";
+    accuracyDisplay.textContent = "100%";
 
-    if(index === 0) span.className = "active";
+    typingInput.value = "";
+    typingInput.disabled = false;
 
-    passage.appendChild(span);
-  });
+    message.textContent = "Typing shuru karte hi timer start ho jayega.";
+
+    renderText();
 }
 
-function updateStats(){
-  const value = typing.value;
-  const spans = passage.querySelectorAll("span");
+function startTimer() {
+    if (started || finished) return;
 
-  let correct = 0;
+    started = true;
+    message.textContent = "Typing test chal raha hai...";
 
-  spans.forEach((span,index)=>{
-    span.className = "";
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
 
-    if(index < value.length){
-      if(value[index] === text[index]){
-        span.className = "correct";
-        correct++;
-      }else{
-        span.className = "wrong";
-      }
-    }else if(index === value.length){
-      span.className = "active";
+        updateStats();
+
+        if (timeLeft <= 0) {
+            finishTest();
+        }
+    }, 1000);
+}
+
+function updateStats() {
+    const typed = [...typingInput.value];
+    const correct = typed.filter((char, index) =>
+        char === [...targetText][index]
+    ).length;
+
+    const accuracy = typed.length === 0
+        ? 100
+        : Math.round((correct / typed.length) * 100);
+
+    const elapsed = Number(duration.value) - timeLeft;
+    const minutes = Math.max(elapsed / 60, 1 / 60);
+    const wpm = Math.round((correct / 5) / minutes);
+
+    wpmDisplay.textContent = wpm;
+    accuracyDisplay.textContent = accuracy + "%";
+
+    const spans = textDisplay.querySelectorAll("span");
+
+    spans.forEach((span, index) => {
+        span.classList.remove("correct", "wrong", "current");
+
+        if (index < typed.length) {
+            if (typed[index] === [...targetText][index]) {
+                span.classList.add("correct");
+            } else {
+                span.classList.add("wrong");
+            }
+        }
+    });
+
+    if (typed.length < spans.length) {
+        spans[typed.length].classList.add("current");
     }
-  });
-
-  const elapsed = Math.max(
-    (Date.now()-startTime)/1000,1
-  );
-
-  const speed = Math.round(
-    (correct/5)/(elapsed/60)
-  );
-
-  const accuracyValue = value.length
-    ? Math.round(correct/value.length*100)
-    : 100;
-
-  wpm.textContent = speed;
-  accuracy.textContent = accuracyValue+"%";
 }
 
-function startTest(){
-  if(running) return;
+function finishTest() {
+    clearInterval(timerInterval);
 
-  running = true;
-  startTime = Date.now();
+    finished = true;
+    typingInput.disabled = true;
+    timeLeft = 0;
+    timerDisplay.textContent = "0";
 
-  typing.disabled = false;
-  typing.value = "";
-  typing.focus();
-
-  start.textContent = "TEST RUNNING";
-  result.textContent = "";
-
-  interval = setInterval(()=>{
-    const elapsed = Math.floor(
-      (Date.now()-startTime)/1000
-    );
-
-    timeLeft = Math.max(
-      Number(duration.value)-elapsed,0
-    );
-
-    timer.textContent = timeLeft;
     updateStats();
 
-    if(timeLeft <= 0){
-      finishTest();
+    const currentWpm = Number(wpmDisplay.textContent);
+
+    if (currentWpm > bestWpm) {
+        bestWpm = currentWpm;
+        localStorage.setItem("fastbar_best", bestWpm);
+        bestWpmDisplay.textContent = bestWpm;
     }
-  },200);
+
+    totalTests++;
+    localStorage.setItem("fastbar_tests", totalTests);
+    totalTestsDisplay.textContent = totalTests;
+
+    message.textContent = "Test complete! Apna result share karo.";
 }
 
-function finishTest(){
-  clearInterval(interval);
-  running = false;
-  typing.disabled = true;
+typingInput.addEventListener("input", () => {
+    if (finished) return;
 
-  start.textContent = "START AGAIN";
+    if (typingInput.value.length > targetText.length) {
+        typingInput.value = typingInput.value.slice(0, targetText.length);
+    }
 
-  const score = Number(wpm.textContent);
-  const oldBest = getBest();
+    if (typingInput.value.length > 0) {
+        startTimer();
+    }
 
-  if(score > oldBest){
-    saveBest(score);
-    best.textContent = score;
-  }
+    updateStats();
 
-  result.textContent =
-    "Test Complete! Speed: "+score+
-    " WPM | Accuracy: "+accuracy.textContent;
-}
-
-function resetTest(){
-  clearInterval(interval);
-
-  running = false;
-  startTime = null;
-
-  timeLeft = Number(duration.value);
-  timer.textContent = timeLeft;
-
-  wpm.textContent = "0";
-  accuracy.textContent = "100%";
-
-  typing.value = "";
-  typing.disabled = true;
-
-  start.textContent = "START TEST";
-  result.textContent = "";
-
-  renderText();
-}
-
-language.addEventListener("change",()=>{
-  text = language.value === "hi"
-    ? hindiText
-    : englishText;
-
-  resetTest();
+    if (typingInput.value.length >= targetText.length) {
+        finishTest();
+    }
 });
 
-duration.addEventListener("change",resetTest);
+document.getElementById("resetButton").addEventListener("click", resetTest);
 
-start.addEventListener("click",startTest);
-reset.addEventListener("click",resetTest);
+language.addEventListener("change", resetTest);
+duration.addEventListener("change", resetTest);
 
-typing.addEventListener("input",updateStats);
+themeButton.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
 
-theme.addEventListener("click",()=>{
-  document.body.classList.toggle("light");
+    const darkMode = document.body.classList.contains("dark");
 
-  theme.textContent =
-    document.body.classList.contains("light")
-      ? "🌙 Dark"
-      : "☀️ Light";
+    themeButton.textContent = darkMode
+        ? "☀️ Light Mode"
+        : "🌙 Dark Mode";
 });
 
-timer.textContent = duration.value;
+document.getElementById("shareResult").addEventListener("click", async () => {
+    const result =
+        "My FASTBARTYPE Typing Test Result!\n" +
+        "WPM: " + wpmDisplay.textContent + "\n" +
+        "Accuracy: " + accuracyDisplay.textContent + "\n\n" +
+        "Try FASTBARTYPE:\n" +
+        "https://rajakbansi8-netizen.github.io/FASTBARTYPE/";
 
-renderText();
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: "My FASTBARTYPE Score",
+                text: result
+            });
+        } catch (error) {
+            // User cancelled sharing.
+        }
+    } else {
+        try {
+            await navigator.clipboard.writeText(result);
+            message.textContent = "Result copied! Ab share kar sakte ho.";
+        } catch (error) {
+            message.textContent = "Share feature is not supported in this browser.";
+        }
+    }
+});
+
+resetTest();
 </script>
 
-<button id="shareResult">📤 Share Result</button>
-  
 </body>
-</html>
+  </html>
+                                    
