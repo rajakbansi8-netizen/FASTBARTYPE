@@ -1,0 +1,381 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FASTBARTYPE - Typing Speed Test</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #080b12;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 22px;
+  text-align: center;
+  border-bottom: 1px solid #222;
+}
+
+.logo {
+  font-size: 30px;
+  font-weight: bold;
+  color: #00ffab;
+}
+
+.logo span {
+  color: white;
+}
+
+main {
+  max-width: 800px;
+  margin: 45px auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 34px;
+}
+
+h1 span {
+  color: #00ffab;
+}
+
+.subtitle {
+  text-align: center;
+  color: #999;
+  margin: 15px 0 35px;
+}
+
+.box {
+  background: #111827;
+  padding: 25px;
+  border-radius: 18px;
+  border: 1px solid #263044;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.stat {
+  background: #080b12;
+  padding: 15px 5px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.stat h2 {
+  color: #00ffab;
+  font-size: 27px;
+}
+
+.stat p {
+  color: #888;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+#words {
+  font-size: 21px;
+  line-height: 1.9;
+  color: #788397;
+  margin-bottom: 20px;
+  overflow-wrap: anywhere;
+}
+
+.correct {
+  color: #00ffab;
+}
+
+.wrong {
+  color: #ff5268;
+  background: #351923;
+}
+
+.active {
+  border-bottom: 2px solid #00ffab;
+}
+
+textarea {
+  width: 100%;
+  height: 110px;
+  background: #080b12;
+  color: white;
+  border: 1px solid #344054;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 18px;
+  outline: none;
+}
+
+textarea:focus {
+  border-color: #00ffab;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+button {
+  padding: 15px;
+  border: 0;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#start {
+  background: #00ffab;
+  flex: 1;
+}
+
+#reset {
+  background: #263044;
+  color: white;
+}
+
+#result {
+  text-align: center;
+  color: #00ffab;
+  margin-top: 20px;
+  font-size: 20px;
+}
+
+footer {
+  text-align: center;
+  color: #666;
+  padding: 25px;
+}
+
+@media(max-width:600px) {
+  main {
+    margin: 20px auto;
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  .box {
+    padding: 17px;
+  }
+
+  #words {
+    font-size: 18px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">FAST<span>BARTYPE</span></div>
+</header>
+
+<main>
+
+<h1>Typing <span>Speed Test</span></h1>
+
+<p class="subtitle">
+Improve your speed. Improve your accuracy.
+</p>
+
+<div class="box">
+
+<div class="stats">
+
+<div class="stat">
+<h2 id="timer">60</h2>
+<p>SECONDS</p>
+</div>
+
+<div class="stat">
+<h2 id="wpm">0</h2>
+<p>WPM</p>
+</div>
+
+<div class="stat">
+<h2 id="acc">100%</h2>
+<p>ACCURACY</p>
+</div>
+
+</div>
+
+<div id="words"></div>
+
+<textarea id="typing" disabled
+placeholder="Press Start and begin typing..."></textarea>
+
+<div class="buttons">
+<button id="start">START TEST</button>
+<button id="reset">RESET</button>
+</div>
+
+<div id="result"></div>
+
+</div>
+</main>
+
+<footer>
+© 2026 FASTBARTYPE
+</footer>
+
+<script>
+const passage =
+"Practice typing every day to improve your speed and accuracy. Keep your fingers relaxed and focus on typing each word correctly. FastBarType helps you become a better typist through regular practice.";
+
+const words = document.getElementById("words");
+const typing = document.getElementById("typing");
+const timer = document.getElementById("timer");
+const wpm = document.getElementById("wpm");
+const acc = document.getElementById("acc");
+const start = document.getElementById("start");
+const reset = document.getElementById("reset");
+const result = document.getElementById("result");
+
+let time = 60;
+let running = false;
+let interval = null;
+let startTime = null;
+
+function renderText() {
+  words.innerHTML = "";
+
+  passage.split("").forEach((char, index) => {
+    const span = document.createElement("span");
+    span.textContent = char;
+
+    if (index === 0) {
+      span.className = "active";
+    }
+
+    words.appendChild(span);
+  });
+}
+
+function beginTest() {
+  if (running) return;
+
+  running = true;
+  startTime = Date.now();
+
+  typing.disabled = false;
+  typing.value = "";
+  typing.focus();
+
+  start.textContent = "TEST RUNNING";
+  result.textContent = "";
+
+  interval = setInterval(() => {
+    const elapsed = Math.floor(
+      (Date.now() - startTime) / 1000
+    );
+
+    time = Math.max(60 - elapsed, 0);
+    timer.textContent = time;
+
+    updateStats();
+
+    if (time <= 0) {
+      finishTest();
+    }
+  }, 200);
+}
+
+function updateStats() {
+  const value = typing.value;
+  const spans = words.querySelectorAll("span");
+
+  let correct = 0;
+
+  spans.forEach((span, index) => {
+    span.className = "";
+
+    if (index < value.length) {
+      if (value[index] === passage[index]) {
+        span.className = "correct";
+        correct++;
+      } else {
+        span.className = "wrong";
+      }
+    } else if (index === value.length) {
+      span.className = "active";
+    }
+  });
+
+  const elapsedSeconds = Math.max(
+    (Date.now() - startTime) / 1000,
+    1
+  );
+
+  const minutes = elapsedSeconds / 60;
+
+  wpm.textContent = Math.round(
+    (correct / 5) / minutes
+  );
+
+  acc.textContent = value.length
+    ? Math.round(
+        (correct / value.length) * 100
+      ) + "%"
+    : "100%";
+}
+
+function finishTest() {
+  clearInterval(interval);
+
+  running = false;
+  typing.disabled = true;
+
+  start.textContent = "START AGAIN";
+
+  result.textContent =
+    "Your speed: " + wpm.textContent + " WPM";
+}
+
+function restartTest() {
+  clearInterval(interval);
+
+  time = 60;
+  running = false;
+  startTime = null;
+
+  timer.textContent = "60";
+  wpm.textContent = "0";
+  acc.textContent = "100%";
+
+  typing.value = "";
+  typing.disabled = true;
+
+  start.textContent = "START TEST";
+  result.textContent = "";
+
+  renderText();
+}
+
+start.addEventListener("click", beginTest);
+reset.addEventListener("click", restartTest);
+typing.addEventListener("input", updateStats);
+
+renderText();
+</script>
+
+</body>
+</html>
