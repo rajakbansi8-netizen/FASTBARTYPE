@@ -552,6 +552,10 @@ document.getElementById("shareResult").addEventListener("click", async () => {
 });
 
 resetTest();
+const leaderboardScore = document.createElement("div");
+leaderboardScore.innerHTML = "<h3>🏆 Your Best Score</h3><p>Best WPM: " + localStorage.getItem("fastbar_best") + "</p>";
+document.querySelector(".container").appendChild(leaderboardScore);
+    
 </script>
 
 </body>
