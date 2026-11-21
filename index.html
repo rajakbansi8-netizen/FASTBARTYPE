@@ -1,4 +1,4 @@
-
+p
 <!DOCTYPE html>
 <html lang="en">
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -502,6 +502,18 @@ function finishTest() {
     updateStats();
 
     const currentWpm = Number(wpmDisplay.textContent);
+  const user = firebase.auth().currentUser;
+
+if (user) {
+  const accuracy = Number(
+    accuracyDisplay.textContent.replace("%", "")
+  );
+
+  database.ref("scores/" + user.uid).set({
+    wpm: currentWpm,
+    accuracy: accuracy
+  });
+}
 
     if (currentWpm > bestWpm) {
         bestWpm = currentWpm;
