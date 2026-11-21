@@ -17,6 +17,11 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
+  const auth = firebase.auth();
+
+auth.signInAnonymously().catch((error) => {
+  console.log("Login error:", error);
+});
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
   
