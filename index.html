@@ -1,12 +1,29 @@
 
 <!DOCTYPE html>
 <html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FASTBARTYPE - Typing Test</title>
+
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
+<!-- Firebase Setup -->
 <script>
 const firebaseConfig = {
-  apiKey: "तुम्हारा API KEY",
+  const firebaseConfig = {
+  apiKey: "AIzaSyDu8H1JHUAM_EQN33wuW_CnPo54RXEtd1s",
+  authDomain: "fastbartype.firebaseapp.com",
+  databaseURL: "https://fastbartype-default-rtdb.firebaseio.com",
+  projectId: "fastbartype",
+  storageBucket: "fastbartype.firebasestorage.app",
+  messagingSenderId: "29949806574",
+  appId: "1:29949806574:web:d9576205ad77246b93b0ff",
+  measurementId: "G-4RJ5E52MZB"
+};
   authDomain: "fastbartype.firebaseapp.com",
   databaseURL: "https://fastbartype-default-rtdb.firebaseio.com",
   projectId: "fastbartype",
@@ -16,20 +33,18 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
 const database = firebase.database();
-  const auth = firebase.auth();
+const auth = firebase.auth();
 
-auth.signInAnonymously().catch((error) => {
-  console.log("Login error:", error);
-});
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-
-  
+// Anonymous login
+const authReady = auth.signInAnonymously()
+  .then((credential) => credential.user)
+  .catch((error) => {
+    console.error("Firebase login error:", error);
+    return null;
+  });
 </script>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BRTYPEING- Typing Test</title>
 
 <style>
 * {
@@ -234,6 +249,19 @@ button:hover {
     text-align: center;
 }
 
+.best-score {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+.best-score h3 {
+    margin-bottom: 8px;
+}
+
 footer {
     text-align: center;
     color: var(--muted);
@@ -345,15 +373,22 @@ footer {
             <h2 id="bestWpm">0</h2>
             <p>Best WPM</p>
         </div>
+
         <div class="stat">
             <h2 id="totalTests">0</h2>
             <p>Tests Completed</p>
         </div>
+
         <div class="stat">
             <h2>⌨️</h2>
             <p>Keep Practicing</p>
         </div>
     </div>
+</div>
+
+<div class="best-score">
+    <h3>🏆 Your Best Score</h3>
+    <p>Best WPM: <span id="bestScoreText">0</span></p>
 </div>
 
 <footer>
@@ -384,6 +419,7 @@ const wpmDisplay = document.getElementById("wpm");
 const accuracyDisplay = document.getElementById("accuracy");
 const bestWpmDisplay = document.getElementById("bestWpm");
 const totalTestsDisplay = document.getElementById("totalTests");
+const bestScoreText = document.getElementById("bestScoreText");
 const message = document.getElementById("message");
 const themeButton = document.getElementById("themeButton");
 
@@ -392,10 +428,12 @@ let timeLeft = 60;
 let timerInterval = null;
 let started = false;
 let finished = false;
+
 let bestWpm = Number(localStorage.getItem("fastbar_best") || 0);
 let totalTests = Number(localStorage.getItem("fastbar_tests") || 0);
 
 bestWpmDisplay.textContent = bestWpm;
+bestScoreText.textContent = bestWpm;
 totalTestsDisplay.textContent = totalTests;
 
 function getText() {
@@ -457,9 +495,15 @@ function startTimer() {
 
 function updateStats() {
     const typed = [...typingInput.value];
-    const correct = typed.filter((char, index) =>
-        char === [...targetText][index]
-    ).length;
+    const targetCharacters = [...targetText];
+
+    let correct = 0;
+
+    typed.forEach((character, index) => {
+        if (character === targetCharacters[index]) {
+            correct++;
+        }
+    });
 
     const accuracy = typed.length === 0
         ? 100
@@ -478,7 +522,7 @@ function updateStats() {
         span.classList.remove("correct", "wrong", "current");
 
         if (index < typed.length) {
-            if (typed[index] === [...targetText][index]) {
+            if (typed[index] === targetCharacters[index]) {
                 span.classList.add("correct");
             } else {
                 span.classList.add("wrong");
@@ -491,7 +535,31 @@ function updateStats() {
     }
 }
 
+// Save score to Firebase
+function saveScore(currentWpm, accuracy) {
+    authReady.then((user) => {
+        if (!user) {
+            message.textContent = "Firebase login nahi hua. Score online save nahi hua.";
+            return;
+        }
+
+        database.ref("scores/" + user.uid).set({
+            wpm: currentWpm,
+            accuracy: accuracy
+        })
+        .then(() => {
+            message.textContent = "Test complete! Score online save ho gaya.";
+        })
+        .catch((error) => {
+            console.error("Score save error:", error);
+            message.textContent = "Score online save nahi hua.";
+        });
+    });
+}
+
 function finishTest() {
+    if (finished) return;
+
     clearInterval(timerInterval);
 
     finished = true;
@@ -502,23 +570,19 @@ function finishTest() {
     updateStats();
 
     const currentWpm = Number(wpmDisplay.textContent);
-  const user = firebase.auth().currentUser;
+    const accuracy = Number(
+        accuracyDisplay.textContent.replace("%", "")
+    );
 
-if (user) {
-  const accuracy = Number(
-    accuracyDisplay.textContent.replace("%", "")
-  );
-
-  database.ref("scores/" + user.uid).set({
-    wpm: currentWpm,
-    accuracy: accuracy
-  });
-}
+    // Save score online
+    saveScore(currentWpm, accuracy);
 
     if (currentWpm > bestWpm) {
         bestWpm = currentWpm;
         localStorage.setItem("fastbar_best", bestWpm);
+
         bestWpmDisplay.textContent = bestWpm;
+        bestScoreText.textContent = bestWpm;
     }
 
     totalTests++;
@@ -589,12 +653,9 @@ document.getElementById("shareResult").addEventListener("click", async () => {
 });
 
 resetTest();
-const leaderboardScore = document.createElement("div");
-leaderboardScore.innerHTML = "<h3>🏆 Your Best Score</h3><p>Best WPM: " + localStorage.getItem("fastbar_best") + "</p>";
-document.querySelector(".container").appendChild(leaderboardScore);
-    
 </script>
 
 </body>
   </html>
-                                    
+  
+    
