@@ -14,8 +14,9 @@ h1{margin:0;color:var(--blue);font-size:clamp(28px,6vw,42px);letter-spacing:1px}
 header p{margin:6px 0;color:var(--muted)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:22px;margin:16px 0;box-shadow:0 8px 25px #15294a0b}
 .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
-select,button{font:inherit;border-radius:12px;border:1px solid var(--line);padding:11px 14px}
-select{background:white;color:var(--ink)}
+select,button,input{font:inherit;border-radius:12px;border:1px solid var(--line);padding:11px 14px}
+select,input{background:white;color:var(--ink)}
+input.name-input{width:min(100%,340px)}
 button{background:var(--blue);color:white;border:0;font-weight:700;cursor:pointer}
 button:disabled{opacity:.55;cursor:not-allowed}
 button.secondary{background:#eef3ff;color:var(--blue)}
@@ -32,8 +33,16 @@ textarea:focus{border-color:#8fb2ff}
 .status.ok{color:var(--green)}.status.err{color:#dc2626}
 .result{text-align:center;font-size:18px;line-height:1.7}
 .result strong{color:var(--blue)}
+.section-title{text-align:center;margin:5px 0 14px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:320px}
+th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-size:14px}
+td:first-child,th:first-child{text-align:center;width:55px}
+td:nth-child(3),td:nth-child(4),th:nth-child(3),th:nth-child(4){text-align:center}
+.leader-status{text-align:center;color:var(--muted);padding:10px}
 footer{text-align:center;color:var(--muted);font-size:14px;margin-top:22px}
-@media(max-width:560px){.card{padding:16px}.stats{gap:7px}.stat{padding:12px 4px}.prompt{font-size:18px}textarea{font-size:18px}}
+@media(max-width:560px){.card{padding:16px}.stats{gap:7px}.stat{padding:12px 4px}.prompt{font-size:18px}textarea{font-size:18px}th,td{padding:10px 6px}}
 </style>
 </head>
 <body>
@@ -44,6 +53,10 @@ footer{text-align:center;color:var(--muted);font-size:14px;margin-top:22px}
 </header>
 
 <section class="card">
+<div class="controls" style="margin-bottom:14px">
+<label for="playerName">अपना नाम / Display name</label>
+<input id="playerName" class="name-input" type="text" maxlength="20" placeholder="अपना नाम लिखो (20 अक्षर तक)" autocomplete="nickname">
+</div>
 <div class="controls">
 <label for="language">भाषा / Language</label>
 <select id="language">
@@ -83,6 +96,19 @@ footer{text-align:center;color:var(--muted);font-size:14px;margin-top:22px}
 <h2>🏆 Your Best Score</h2>
 <p>Best WPM: <strong id="bestText">0</strong></p>
 </section>
+
+<section class="card">
+<h2 class="section-title">🏆 Top 10 Leaderboard</h2>
+<p class="leader-status" id="leaderStatus">Leaderboard लोड हो रही है…</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Rank</th><th>Player</th><th>WPM</th><th>Accuracy</th></tr></thead>
+<tbody id="leaderboardBody">
+<tr><td colspan="4" style="text-align:center">स्कोर लोड हो रहे हैं…</td></tr>
+</tbody>
+</table>
+</div>
+</section>
 <footer>FASTBARTYPE © 2026 | Practice. Improve. Repeat.</footer>
 </div>
 
@@ -90,7 +116,6 @@ footer{text-align:center;color:var(--muted);font-size:14px;margin-top:22px}
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script>
-/* Firebase web configuration for FASTBARTYPE */
 const firebaseConfig = {
   apiKey: "AIzaSyDu8H1JHUAM_EQN33wuW_CnPo54RXEtd1s",
   authDomain: "fastbartype.firebaseapp.com",
@@ -104,10 +129,11 @@ const firebaseConfig = {
 
 const $ = id => document.getElementById(id);
 const languageEl=$("language"), durationEl=$("duration"), typingEl=$("typing");
-const promptEl=$("prompt"), statusEl=$("status");
+const nameEl=$("playerName"), promptEl=$("prompt"), statusEl=$("status");
 const timeEl=$("time"), wpmEl=$("wpm"), accuracyEl=$("accuracy"), barEl=$("bar");
 const startBtn=$("start"), restartBtn=$("restart"), shareBtn=$("share");
 const bestEl=$("best"), testsEl=$("tests"), bestTextEl=$("bestText");
+const leaderboardBody=$("leaderboardBody"), leaderStatus=$("leaderStatus");
 
 const passages = {
  en:[
@@ -123,7 +149,7 @@ const passages = {
 };
 
 let active=false, startedAt=0, remaining=60, interval=null, targetText="", lastWpm=0, lastAccuracy=100;
-let firebaseReady=false, authUser=null, authPromise=null;
+let authUser=null, authPromise=null, leaderboardStarted=false;
 
 function setStatus(message,kind=""){
  statusEl.textContent=message;
@@ -163,6 +189,13 @@ function resetTest(){
 }
 function startTest(){
  if(active)return;
+ const playerName=nameEl.value.trim();
+ if(!playerName){
+  nameEl.focus();setStatus("पहले अपना display name लिखो।","err");return;
+ }
+ if(playerName.length>20){
+  setStatus("नाम 20 अक्षरों से छोटा रखो।","err");return;
+ }
  clearTimer();active=true;
  remaining=Number(durationEl.value);
  startedAt=Date.now();
@@ -179,23 +212,22 @@ function startTest(){
  },1000);
 }
 async function ensureAuth(){
- if(!window.firebase){throw new Error("Firebase SDK लोड नहीं हुआ। इंटरनेट कनेक्शन जाँचो।");}
- if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+ if(!window.firebase)throw new Error("Firebase SDK लोड नहीं हुआ। इंटरनेट कनेक्शन जाँचो।");
+ if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
  const auth=firebase.auth();
  if(auth.currentUser){authUser=auth.currentUser;return authUser;}
  if(authPromise)return authPromise;
  authPromise=auth.signInAnonymously().then(credential=>{
-   authUser=credential.user;
-   return authUser;
+  authUser=credential.user;return authUser;
  }).finally(()=>{authPromise=null;});
  return authPromise;
 }
-async function saveScore(wpm,accuracy){
- // Save only these two fields; this matches the current Firebase Rules.
+async function saveScore(wpm,accuracy,name){
  const user=await ensureAuth();
  await firebase.database().ref("scores/"+user.uid).set({
-   wpm:Number(wpm),
-   accuracy:Number(accuracy)
+  name:name,
+  wpm:Number(wpm),
+  accuracy:Number(accuracy)
  });
 }
 async function finishTest(){
@@ -204,6 +236,7 @@ async function finishTest(){
  typingEl.disabled=true;startBtn.disabled=false;shareBtn.disabled=false;
  updateStats();
  const finalWpm=lastWpm, finalAccuracy=lastAccuracy;
+ const playerName=nameEl.value.trim().slice(0,20);
  const best=Math.max(Number(localStorage.getItem("fastbartype_best")||0),finalWpm);
  const tests=Number(localStorage.getItem("fastbartype_tests")||0)+1;
  localStorage.setItem("fastbartype_best",String(best));
@@ -211,38 +244,75 @@ async function finishTest(){
  bestEl.textContent=best;bestTextEl.textContent=best;testsEl.textContent=tests;
  setStatus("स्कोर Firebase में सेव हो रहा है…");
  try{
-  await saveScore(finalWpm,finalAccuracy);
-  setStatus("स्कोर Firebase में सफलतापूर्वक सेव हो गया!","ok");
+  await saveScore(finalWpm,finalAccuracy,playerName);
+  setStatus("स्कोर नाम के साथ Firebase में सेव हो गया!","ok");
  }catch(error){
   console.error("Firebase save error:",error);
   setStatus("ऑनलाइन सेव नहीं हुआ: "+(error.code||error.message||"Firebase error"),"err");
  }
 }
+function renderLeaderboard(snapshot){
+ const data=snapshot.val()||{};
+ const scores=Object.entries(data).map(([uid,item])=>({
+  name:typeof item.name==="string"&&item.name.trim()?item.name.trim().slice(0,20):"Player",
+  wpm:Number(item.wpm)||0,
+  accuracy:Number(item.accuracy)||0
+ })).filter(item=>Number.isFinite(item.wpm)&&Number.isFinite(item.accuracy));
+ scores.sort((a,b)=>b.wpm-a.wpm||b.accuracy-a.accuracy);
+ const top=scores.slice(0,10);
+ leaderboardBody.textContent="";
+ if(!top.length){
+  const tr=document.createElement("tr"),td=document.createElement("td");
+  td.colSpan=4;td.style.textAlign="center";td.textContent="अभी कोई score नहीं है। पहला टेस्ट खेलो!";
+  tr.appendChild(td);leaderboardBody.appendChild(tr);
+ }else{
+  top.forEach((item,index)=>{
+   const tr=document.createElement("tr");
+   [String(index+1),item.name,String(item.wpm),item.accuracy+"%"].forEach(value=>{
+    const td=document.createElement("td");td.textContent=value;tr.appendChild(td);
+   });
+   leaderboardBody.appendChild(tr);
+  });
+ }
+ leaderStatus.textContent="Live scores • "+scores.length+" players";
+}
+function startLeaderboard(){
+ if(leaderboardStarted)return;
+ leaderboardStarted=true;
+ ensureAuth().then(()=>{
+  firebase.database().ref("scores").on("value",renderLeaderboard,error=>{
+   console.error("Leaderboard error:",error);
+   leaderStatus.textContent="Leaderboard load नहीं हुई: "+(error.code||error.message);
+  });
+ }).catch(error=>{
+  console.error("Leaderboard auth error:",error);
+  leaderStatus.textContent="Firebase sign-in नहीं हुआ: "+(error.code||error.message);
+ });
+}
 typingEl.addEventListener("input",()=>{
  if(!active)return;
  updateStats();
- if(typingEl.value.length>=targetText.length) finishTest();
+ if(typingEl.value.length>=targetText.length)finishTest();
 });
 startBtn.addEventListener("click",startTest);
 restartBtn.addEventListener("click",resetTest);
 languageEl.addEventListener("change",resetTest);
 durationEl.addEventListener("change",resetTest);
 shareBtn.addEventListener("click",async()=>{
- const text=`My FASTBARTYPE Typing Test Result!\nWPM: ${lastWpm}\nAccuracy: ${lastAccuracy}%\nTry FASTBARTYPE: https://rajakbansi8-netizen.github.io/FASTBARTYPE/`;
+ const playerName=nameEl.value.trim()||"Player";
+ const text=`My FASTBARTYPE Typing Test Result!\nName: ${playerName}\nWPM: ${lastWpm}\nAccuracy: ${lastAccuracy}%\nTry FASTBARTYPE: https://rajakbansi8-netizen.github.io/FASTBARTYPE/`;
  try{
-  if(navigator.share) await navigator.share({title:"FASTBARTYPE Result",text});
+  if(navigator.share)await navigator.share({title:"FASTBARTYPE Result",text});
   else if(navigator.clipboard){await navigator.clipboard.writeText(text);setStatus("Result copied—share it anywhere.","ok");}
-  else {prompt("Copy your result:",text);}
+  else prompt("Copy your result:",text);
  }catch(e){if(e.name!=="AbortError")setStatus("Share नहीं हो पाया।","err");}
 });
 bestEl.textContent=Number(localStorage.getItem("fastbartype_best")||0);
 bestTextEl.textContent=bestEl.textContent;
 testsEl.textContent=Number(localStorage.getItem("fastbartype_tests")||0);
 resetTest();
-
-// Firebase initialization/auth status check; score saving signs in again only if needed.
-ensureAuth().then(()=>{firebaseReady=true;console.log("FASTBARTYPE Firebase anonymous auth ready");})
-.catch(error=>{console.error("Firebase auth setup error:",error);setStatus("Firebase sign-in नहीं हुआ: "+(error.code||error.message),"err");});
+startLeaderboard();
 </script>
 </body>
   </html>
+               
